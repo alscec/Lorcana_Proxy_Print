@@ -13,9 +13,6 @@ RUN npm ci --only=production
 # Production image
 FROM node:20-alpine
 
-# Install security updates
-RUN apk --no-cache upgrade
-
 # Create app directory and user
 WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && \
