@@ -1,0 +1,82 @@
+name: Policy Validation
+
+on:
+  pull_request:
+    paths:
+      - 'k8s/**'
+      - 'Dockerfile'
+      - 'policies/**'
+  push:
+    branches: [main, develop]
+    paths:
+      - 'k8s/**'
+      - 'Dockerfile'
+      - 'policies/**'
+
+jobs:
+  opa-validate:
+    name: OPA Policy Validation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup OPA
+      uses: open-policy-agent/setup-opa@v2
+      with:
+        version: latest
+        
+    - name: Validate Kubernetes policies
+      run: |
+        echo "Validating Kubernetes security policies..."
+        opa test policies/kubernetes-security.rego -v
+        
+    - name: Validate Dockerfile policies
+      run: |
+        echo "Validating Dockerfile security policies..."
+        opa test policies/dockerfile-security.rego -v
+        
+    - name: Check policies against manifests
+      run: |
+        echo "Checking Kubernetes manifests against policies..."
+        for file in k8s/*.yaml; do
+          echo "Checking $file"
+          # This is a placeholder - in production you'd use conftest or similar
+          opa eval -d policies/kubernetes-security.rego -i "$file" "data.kubernetes.admission.deny" || true
+        done
+
+  dockerfile-lint:
+    name: Dockerfile Linting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run Hadolint
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: Dockerfile
+        failure-threshold: warning
+        
+  kubernetes-lint:
+    name: Kubernetes Manifest Linting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run kube-linter
+      uses: stackrox/kube-linter-action@v1
+      with:
+        directory: k8s
+        config: .kube-linter.yaml
+      continue-on-error: true

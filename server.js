@@ -434,6 +434,47 @@ function drawCropMarks(page, x, y, w, h) {
     ctx.drawLine({ start: { x: x + w, y: y + h }, end: { x: x + w, y: y + h + mark }, thickness: stroke, color: c });
 }
 
+// Health check endpoint for container orchestration
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+// Readiness check endpoint
+app.get('/ready', (req, res) => {
+  res.status(200).json({ 
+    status: 'ready',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Metrics endpoint for Prometheus (basic)
+// NOTE: For production, consider using 'prom-client' library for more robust metrics
+// npm install prom-client
+app.get('/metrics', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain');
+  res.send(`
+# HELP nodejs_version_info Node.js version info
+# TYPE nodejs_version_info gauge
+nodejs_version_info{version="${process.version}"} 1
+
+# HELP process_uptime_seconds Process uptime in seconds
+# TYPE process_uptime_seconds gauge
+process_uptime_seconds ${process.uptime()}
+
+# HELP process_resident_memory_bytes Resident memory size in bytes
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes ${process.memoryUsage().rss}
+
+# HELP process_heap_bytes Process heap size in bytes
+# TYPE process_heap_bytes gauge
+process_heap_bytes ${process.memoryUsage().heapUsed}
+  `.trim());
+});
+
 app.post('/generate', async(req, res) => {
             try {
                 const {
