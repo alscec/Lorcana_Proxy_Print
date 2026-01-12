@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: lorcana-proxy-print
+  namespace: lorcana-proxy
+  labels:
+    app: lorcana-proxy-print
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app: lorcana-proxy-print

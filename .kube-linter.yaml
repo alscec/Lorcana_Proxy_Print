@@ -1,0 +1,35 @@
+checks:
+  # Disabled checks
+  doNotAutoAddDefaults: false
+  exclude:
+    - "no-read-only-root-fs"  # We handle this with security context
+    
+  # Additional checks to include
+  include:
+    - "required-label-owner"
+    - "required-label-app"
+    - "minimum-three-replicas"
+    - "no-privileged-container"
+    - "no-host-network"
+    - "no-host-pid"
+    - "no-host-ipc"
+    - "run-as-non-root"
+
+customChecks:
+  - name: "required-security-context"
+    template: required-annotation
+    params:
+      key: securityContext.runAsNonRoot
+    remediation: "Ensure all containers have securityContext.runAsNonRoot set to true"
+    
+  - name: "resource-limits-cpu-required"
+    template: required-annotation
+    params:
+      key: resources.limits.cpu
+    remediation: "Set CPU limits for all containers"
+    
+  - name: "resource-limits-memory-required"
+    template: required-annotation
+    params:
+      key: resources.limits.memory
+    remediation: "Set memory limits for all containers"
