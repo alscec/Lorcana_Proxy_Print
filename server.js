@@ -452,6 +452,8 @@ app.get('/ready', (req, res) => {
 });
 
 // Metrics endpoint for Prometheus (basic)
+// NOTE: For production, consider using 'prom-client' library for more robust metrics
+// npm install prom-client
 app.get('/metrics', (req, res) => {
   res.setHeader('Content-Type', 'text/plain');
   res.send(`
