@@ -17,6 +17,8 @@ jobs:
   opa-validate:
     name: OPA Policy Validation
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
@@ -49,6 +51,8 @@ jobs:
   dockerfile-lint:
     name: Dockerfile Linting
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
@@ -63,6 +67,8 @@ jobs:
   kubernetes-lint:
     name: Kubernetes Manifest Linting
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
